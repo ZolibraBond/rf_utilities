@@ -29,7 +29,7 @@ def nibbleToBits(inputNib):
     return bits
 
 def populateLevel(outFile, level, sampleCount):
-    for _ in xrange(sampleCount):
+    for _ in range(sampleCount):
         if level == 1:
             outFile.write(b'\x01')
         else:
@@ -44,7 +44,7 @@ class basebandDefinition:
     waveList = []
 
     def __init__(self):
-        print "Creating new baseband definition object"
+        print("Creating new baseband definition object")
         
     def readFromFile(self, inFileName):
         # read each line of the file into a list item
@@ -96,8 +96,7 @@ class basebandDefinition:
                     for char in element[5]:
                         asciiVal = ord(char) # number from 0 to 255
                         bitList = [int(n) for n in bin(asciiVal)[2:].zfill(8)]
-                        print str(asciiVal) + " = ",
-                        print bitList 
+                        print(str(asciiVal) + " = " + bitList)
                         if element[4] == "LSB": # need to reverse for LSB
                             bitList = bitList[::-1]
                         for bit in bitList:
@@ -111,7 +110,7 @@ class basebandDefinition:
                 lowWidth = int(element[2])
                 highWidth = int(element[3])
                 pulseCount = int(element[4])
-                for i in xrange(2*pulseCount):
+                for i in range(2*pulseCount):
                     if level == 0:
                         self.widthList.append([0, lowWidth])
                     else:
@@ -123,12 +122,12 @@ class basebandDefinition:
     def buildWave(self, sampleRate):
         self.waveList = []
         for pair in self.widthList:
-            for _ in xrange( int((1.0*sampleRate/1000000) * pair[1]) ):
+            for _ in range( int((1.0*sampleRate/1000000) * pair[1]) ):
                 self.waveList.append(pair[0])
         
     def writeWaveToFile(self, outFileName, repeatVal):
         with open(outFileName, 'wb') as outFile:
-            for _ in xrange(repeatVal):
+            for _ in range(repeatVal):
                 for bit in self.waveList:
                     if bit == 1:
                         outFile.write(b'\x01')
@@ -137,15 +136,15 @@ class basebandDefinition:
 
 
     def printDefinition(self):
-        print self.elementList
+        print(self.elementList)
 
     def printWidths(self):
         for pair in self.widthList:
-            print pair
+            print(pair)
 
     def printWave(self):
         for bit in self.waveList:
-            print bit,
+            print(bit)
 
 
 def microsecondsToSamples(time, sampleRate):
@@ -154,7 +153,7 @@ def microsecondsToSamples(time, sampleRate):
 def addSamples(basebandList, signalLevel, arbWidth, sampleRate):
     newBasebandList = basebandList
     valsToAdd = microsecondsToSamples(arbWidth, sampleRate)
-    for _ in xrange(valsToAdd):
+    for _ in range(valsToAdd):
         newBasebandList.append(signalLevel)
     if signalLevel == 1:
         newSignalLevel = 0
@@ -166,21 +165,21 @@ def buildBaseband(jsonFileName, basebandSampleRate, initialValue):
     signalLevel = initialValue
 
     # read from file (move to top level)
-    print "reading json data from file: " + jsonFileName
+    print("reading json data from file: " + jsonFileName)
     with open(jsonFileName) as jsonFile:
     #with open("../input_files/test.json") as jsonFile:
         jsonObj = json.load(jsonFile, object_pairs_hook=OrderedDict)
     print(odString(jsonObj))
     pprint(jsonObj)
 
-    print "building baseband"
+    print("building baseband")
     basebandList = []
     # start with preamble
     preambleJson = jsonObj["preamble"]
     pprint(preambleJson)
     for element in preambleJson:
         if element[0] == "arbitrary":
-            print "adding arbitrary timing"
+            print("adding arbitrary timing")
             for arbWidth in element[1]:
                 (basebandList, signalLevel) = addSamples(basebandList, signalLevel, arbWidth)
 
